@@ -68,9 +68,11 @@ function appStart() {
                 appStart()
             } else {
                 console.log("good good");
-                connection.query('UPDATE products SET ? ',
+                connection.query('UPDATE products SET ?  WHERE ?',
                     [{
                             stock_quantity: (iQty - 1)
+                        }, {
+                            item_id: itemPick
                         }
 
                     ],
