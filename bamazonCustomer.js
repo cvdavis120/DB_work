@@ -74,10 +74,10 @@ function appStart() {
                         }
 
                     ],
-                    function (err, res) {
+                    function (err) {
                         if (err) throw err;
                     });
-                var totalAmount = res[i].price * response.itemQty;
+                var totalAmount = itemPrice * response.itemQty;
                 console.log("Your total today is: $" + totalAmount);
             }
 
