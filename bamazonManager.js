@@ -14,8 +14,10 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 var messageoptions = ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "QUIT"]
+var allItems = []
 
 function mainMenu() {
+
     inquirer.prompt([{
         type: "list",
         choices: messageoptions,
@@ -25,7 +27,13 @@ function mainMenu() {
         if (response.choice === "QUIT") {
             return false
         } else {
-
+            connection.query('SELECT * FROM products',
+                function (err, res) {
+                    if (err) throw err;
+                    for (i = 0; i < res.length; i++) {
+                        allItems.push(res[i].product_name)
+                    }
+                })
             switch (response.choice) {
                 case "View Products for Sale":
                     console.log("WE HERE ");
@@ -85,52 +93,47 @@ function lowInv() {
     })
 }
 
-function addToInv(id, amt) {
-    var itemIds = []
-    var initStocks = []
-    var itemName = []
-    connection.query('SELECT price, stock_quantity FROM products'),
-        function (err, res) {
-            if (err) throw err;
-            for (i = 0; i < res.length; i++) {
-                itemIds.push(res[i].item_id)
-                initStocks.push(res[i].stock_quantity)
-                itemName.push(res[i].product_name)
-            }
-            inquirer.prompt([{
-                    type: "list",
-                    choices: itemName,
-                    message: "Which item would you like to add to?",
-                    name: "addedItem"
-                },
-                {
-                    type: "input",
-                    message: "What quantity to add?",
-                    name: "unitQty"
-                }
-            ]).then(function (response) {
-                var initQ = 0
-                for (i = 0; i < res.length; i++) {
-                    if (res[i].product_name === response.addedItem) {
-                        initQ = res[i].stock_quantity
-                    }
-                }
-                connection.query('UPDATE products SET ? WHERE ?',
-                    [{
-                            stock_quantity: (initQ - 1)
-                        }, {
-                            product_name: response.addedItem
-                        }
+function addToInv() {
 
-                    ],
-                    function (err) {
-                        if (err) throw err;
-                        console.log("Inventory Updated!");
-                        mainMenu()
-                    });
-
-            })
+    inquirer.prompt([{
+            type: "list",
+            choices: allItems,
+            message: "Which item would you like to add to?",
+            name: "addedItem"
+        },
+        {
+            type: "input",
+            message: "What quantity to add?",
+            name: "unitQty"
         }
+    ]).then(function (userResponse) {
+        var initQ = 0
+        connection.query('SELECT * FROM products', function (err, resp) {
+            if (err) throw err;
+            console.log(resp)
+            for (i = 0; i < allItems.length; i++) {
+                if (resp[i].product_name === userResponse.addedItem) {
+                    initQ = resp[i].stock_quantity
+                }
+            }
+            connection.query('UPDATE products SET ? WHERE ?',
+                [{
+                        stock_quantity: (initQ + userResponse.unitQty)
+                    }, {
+                        product_name: userResponse.addedItem
+                    }
+
+                ],
+                function (errr) {
+                    if (errr) throw errr;
+                    console.log("Inventory Updated!");
+                    mainMenu()
+                });
+        })
+
+
+    })
+
 
 }
 
