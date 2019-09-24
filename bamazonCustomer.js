@@ -67,12 +67,15 @@ function appStart() {
                 console.log("Insufficient quantity!");
                 appStart()
             } else {
-                console.log("good good");
-                connection.query('UPDATE products SET ?  WHERE ?',
+                iQty -= response.itemQty
+                iQty = parseInt(iQty)
+                // console.log("good good");
+                // console.log(iQty);
+                connection.query('UPDATE products SET ? WHERE ?',
                     [{
-                            stock_quantity: (iQty - 1)
+                            stock_quantity: (iQty)
                         }, {
-                            item_id: itemPick
+                            product_name: itemPick
                         }
 
                     ],
@@ -89,9 +92,3 @@ function appStart() {
 
     })
 }
-
-// Prompt how many to buy of ID
-
-// Check if store has the quantity 
-
-// Update the DB and show the user the total charge amount $

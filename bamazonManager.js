@@ -108,14 +108,16 @@ function addToInv() {
         }
     ]).then(function (userResponse) {
         var initQ = 0
-        connection.query('SELECT * FROM products', function (err, resp) {
-            if (err) throw err;
-            console.log(resp)
-            for (i = 0; i < allItems.length; i++) {
-                if (resp[i].product_name === userResponse.addedItem) {
-                    initQ = resp[i].stock_quantity
-                }
-            }
+        // THIS DOES NOT WORK
+        connection.query('SELECT stock_quantity FROM products WHERE product_name ="' + connection.escape(userResponse.addedItem) + '"', function (err, resp) {
+            console.log(resp);
+            // if (err) throw err;
+            // console.log(resp)
+            // for (i = 0; i < allItems.length; i++) {
+            //     if (resp[i].product_name === userResponse.addedItem) {
+            //         initQ = resp[i].stock_quantity
+            //     }
+            // }
             connection.query('UPDATE products SET ? WHERE ?',
                 [{
                         stock_quantity: (initQ + userResponse.unitQty)
