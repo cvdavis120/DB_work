@@ -17,7 +17,6 @@ var messageoptions = ["View Products for Sale", "View Low Inventory", "Add to In
 var allItems = []
 
 function mainMenu() {
-
     inquirer.prompt([{
         type: "list",
         choices: messageoptions,
@@ -27,13 +26,13 @@ function mainMenu() {
         if (response.choice === "QUIT") {
             return false
         } else {
-            connection.query('SELECT * FROM products',
-                function (err, res) {
-                    if (err) throw err;
-                    for (i = 0; i < res.length; i++) {
-                        allItems.push(res[i].product_name)
-                    }
-                })
+            // connection.query('SELECT * FROM products',
+            //     function (err, res) {
+            //         if (err) throw err;
+            //         for (i = 0; i < res.length; i++) {
+            //             allItems.push(res[i].product_name)
+            //         }
+            //     })
             switch (response.choice) {
                 case "View Products for Sale":
                     console.log("WE HERE ");
@@ -45,6 +44,8 @@ function mainMenu() {
                 case "Add to Inventory":
                     addToInv();
                     break;
+                case "Add New Product":
+
 
             }
         }
@@ -107,36 +108,50 @@ function addToInv() {
             name: "unitQty"
         }
     ]).then(function (userResponse) {
-        var initQ = 0
-        // THIS DOES NOT WORK
-        connection.query('SELECT stock_quantity FROM products WHERE product_name ="' + connection.escape(userResponse.addedItem) + '"', function (err, resp) {
-            console.log(resp);
-            // if (err) throw err;
-            // console.log(resp)
-            // for (i = 0; i < allItems.length; i++) {
-            //     if (resp[i].product_name === userResponse.addedItem) {
-            //         initQ = resp[i].stock_quantity
-            //     }
-            // }
+
+
+        var itemPick = userResponse.addedItem
+        var iQty = ""
+        connection.query('SELECT * FROM products', function (err, res) {
+            if (err) throw err;
+            for (i = 0; i < res.length; i++) {
+                if (res[i].product_name === itemPick) {
+                    iQty = res[i].stock_quantity
+                }
+            }
+            var num = parseInt(userResponse.unitQty)
+            iQty += num
+            iQty = parseInt(iQty)
             connection.query('UPDATE products SET ? WHERE ?',
                 [{
-                        stock_quantity: (initQ + userResponse.unitQty)
+                        stock_quantity: (iQty)
                     }, {
-                        product_name: userResponse.addedItem
+                        product_name: itemPick
                     }
 
                 ],
-                function (errr) {
-                    if (errr) throw errr;
-                    console.log("Inventory Updated!");
-                    mainMenu()
+                function (err) {
+                    if (err) throw err;
+
                 });
+
+
+
+            mainMenu()
         })
-
-
     })
 
 
 }
 
+function listPop() {
+    connection.query('SELECT * FROM products',
+        function (err, res) {
+            if (err) throw err;
+            for (i = 0; i < res.length; i++) {
+                allItems.push(res[i].product_name)
+            }
+        })
+}
+listPop()
 mainMenu()
