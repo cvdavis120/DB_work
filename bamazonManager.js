@@ -45,7 +45,7 @@ function mainMenu() {
                     addToInv();
                     break;
                 case "Add New Product":
-
+                    addItem()
 
             }
         }
@@ -143,6 +143,44 @@ function addToInv() {
 
 
 }
+
+function addItem() {
+    inquirer.prompt([{
+            type: "input",
+            message: "What item would you like to add?",
+            name: "newItem"
+        },
+        {
+            type: "input",
+            message: "What is the stock on hand?",
+            name: "units"
+        }, {
+            type: "input",
+            message: "What is it's price per unit?",
+            name: "ppu"
+        }, {
+            type: "input",
+            message: "What department would this fall under?",
+            name: "newDept"
+        }
+    ]).then(function (answer) {
+
+        ourItem = {
+            product_name: answer.newItem,
+            department_name: answer.newDept,
+            price: answer.ppu,
+            stock_quantity: answer.units
+        }
+        connection.query('INSERT INTO products SET ?', ourItem, function (error, results, fields) {
+            if (error) throw error;
+            mainMenu()
+        });
+    })
+
+}
+
+
+
 
 function listPop() {
     connection.query('SELECT * FROM products',
